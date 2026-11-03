@@ -18,7 +18,7 @@ from drive_uploader import upload_files_to_shared_drive
 # =========================================================
 
 st.set_page_config(
-    page_title="DRPP & SPB Automatic Splitter",
+    page_title="DRPP & SPB Splitter Mikel Ganteng",
     page_icon="📑",
     layout="wide"
 )
@@ -30,14 +30,24 @@ def apply_custom_ui(image_path="background.jpg"):
         with open(image_path, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode()
 
-    bg_css = f'url("data:image/png;base64,{encoded_string}")' if encoded_string else "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)"
+    bg_css = f'url("data:image/png;base64,{encoded_string}")' if encoded_string else "linear-gradient(135deg, #FFE5EC 0%, #F0E6FF 50%, #FFD6E0 100%)"
 
     css = f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap');
 
-    html, body, [class*="css"] {{
-        font-family: 'Plus Jakarta Sans', sans-serif;
+    /* 1. TEKS GLOBAL & BACKGROUND UTAMA */
+    html, body, .stApp, .stMarkdown, p, span, label {{
+        font-family: 'Quicksand', sans-serif !important;
+        color: #2A081C !important;
+    }}
+
+    /* FIX IKON STREAMLIT */
+    [data-testid="stIcon"], 
+    [class*="material-symbols"], 
+    [class*="material-icons"],
+    [data-testid="stFileUploader"] button span:first-child {{
+        font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', 'Material Icons' !important;
     }}
 
     .stApp {{
@@ -48,110 +58,224 @@ def apply_custom_ui(image_path="background.jpg"):
         background-attachment: fixed;
     }}
 
+    /* 2. CONTAINER UTAMA */
     .stMainBlockContainer {{
-        background: rgba(15, 23, 42, 0.82);
+        background: rgba(255, 255, 255, 0.95) !important;
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border-radius: 20px;
+        border-radius: 24px;
         padding: 3rem 2.5rem;
         margin-top: 2rem;
         margin-bottom: 2rem;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        border: 2px solid #FFC2D1;
+        box-shadow: 0 15px 35px rgba(255, 133, 161, 0.2);
     }}
 
+    /* 3. JUDUL & HEADER */
     h1 {{
-        color: #F8FAFC !important;
+        color: #C2185B !important;
         font-weight: 800 !important;
-        letter-spacing: -0.5px;
     }}
 
-    h2, h3 {{
-        color: #E2E8F0 !important;
+    h2, h3, h4 {{
+        color: #880E4F !important;
+        font-weight: 700 !important;
+    }}
+
+    /* 4. PERBAIKAN TABEL DIAGNOSTIK (DATAFRAME & TABLE) */
+    [data-testid="stDataFrame"],
+    [data-testid="stDataFrame"] > div,
+    [data-testid="stDataFrame"] canvas,
+    div[data-testid="stTable"],
+    .stDataFrame,
+    table {{
+        background-color: #FFF0F5 !important;
+        color: #2A081C !important;
+        border-radius: 16px !important;
+    }}
+
+    table, th, td {{
+        background-color: #FFF0F5 !important;
+        color: #2A081C !important;
+        border: 1px solid #FFC2D1 !important;
+        font-weight: 600 !important;
+        padding: 0.6rem 1rem !important;
+    }}
+
+    th {{
+        background-color: #FFE5EC !important;
+        color: #880E4F !important;
+        font-weight: 700 !important;
+    }}
+
+    /* 5. TEXTAREA & TEXT INPUT */
+    div[data-baseweb="textarea"],
+    div[data-baseweb="input"],
+    div[data-baseweb="base-input"],
+    div[data-testid="stTextArea"] > div,
+    div[data-testid="stTextInput"] > div {{
+        background-color: #FFFFFF !important;
+        border-radius: 14px !important;
+    }}
+
+    div[data-baseweb="textarea"] > div,
+    div[data-baseweb="input"] > div {{
+        background-color: #FFFFFF !important;
+        border: 2px solid #FF7597 !important;
+        border-radius: 14px !important;
+    }}
+
+    div[data-baseweb="textarea"] textarea,
+    div[data-baseweb="input"] input,
+    .stTextArea textarea,
+    .stTextInput input {{
+        background-color: #FFFFFF !important;
+        color: #1A000A !important;
+        -webkit-text-fill-color: #1A000A !important;
+        font-weight: 700 !important;
+        font-size: 1.05rem !important;
+        line-height: 1.6 !important;
+    }}
+
+    div[data-baseweb="textarea"] > div:focus-within,
+    div[data-baseweb="input"] > div:focus-within {{
+        border-color: #E91E63 !important;
+        box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.25) !important;
+    }}
+
+    /* 6. ALERT & WARNING BOX */
+    [data-testid="stAlert"] {{
+        background-color: #FFF8E7 !important;
+        border: 2px solid #FFE082 !important;
+        border-radius: 14px !important;
+    }}
+
+    [data-testid="stAlert"] * {{
+        color: #5D4037 !important;
+        font-weight: 700 !important;
+    }}
+
+    /* 7. FILE UPLOADER & TAG FILE */
+    [data-testid="stFileUploaderFileData"],
+    div[data-testid="stFileUploaderFileData"] {{
+        background-color: #FFE5EC !important;
+        border: 2px solid #FF85A1 !important;
+        border-radius: 12px !important;
+    }}
+
+    [data-testid="stFileUploaderFileData"] * {{
+        color: #2A081C !important;
+        font-weight: 700 !important;
+    }}
+
+    [data-testid="stFileUploaderFileData"] svg {{
+        fill: #C2185B !important;
+        color: #C2185B !important;
+    }}
+
+    [data-testid="stFileUploader"] section {{
+        background-color: #FFF5F7 !important;
+        border: 2px dashed #E91E63 !important;
+        border-radius: 18px !important;
+    }}
+
+    [data-testid="stFileUploader"] button {{
+        background-color: #FFE5EC !important;
+        color: #880E4F !important;
+        border: 2px solid #FF85A1 !important;
+        border-radius: 12px !important;
+    }}
+
+    /* 8. EXPANDER HASIL */
+    [data-testid="stExpander"] {{
+        background-color: #FFF0F5 !important;
+        border: 2px solid #FFC2D1 !important;
+        border-radius: 16px !important;
+        margin-bottom: 1rem !important;
+    }}
+
+    [data-testid="stExpander"] details summary {{
+        background-color: #FFE5EC !important;
+        border-radius: 14px !important;
+        padding: 0.8rem 1.2rem !important;
+    }}
+
+    [data-testid="stExpander"] summary * {{
+        color: #880E4F !important;
+        font-weight: 700 !important;
+        font-size: 1.05rem !important;
+    }}
+
+    [data-testid="stExpander"] svg {{
+        fill: #880E4F !important;
+        color: #880E4F !important;
+    }}
+
+    /* 9. TOMBOL UTAMA & SECONDARY */
+    div.stButton > button {{
+        border-radius: 14px !important;
+        font-weight: 700 !important;
+        transition: all 0.25s ease !important;
+    }}
+
+    div.stButton > button[kind="secondary"], 
+    [data-testid="stExpander"] button,
+    div.stDownloadButton > button {{
+        background: #FFE5EC !important;
+        color: #880E4F !important;
+        border: 2px solid #FF85A1 !important;
+    }}
+
+    div.stButton > button[kind="secondary"]:hover, 
+    [data-testid="stExpander"] button:hover,
+    div.stDownloadButton > button:hover {{
+        background: #FFC2D1 !important;
+        color: #5C0632 !important;
+        border-color: #E91E63 !important;
+        transform: translateY(-2px) !important;
+    }}
+
+    div.stDownloadButton > button * {{
+        color: #880E4F !important;
         font-weight: 700 !important;
     }}
 
     div.stButton > button[kind="primary"] {{
-        background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%) !important;
+        background: linear-gradient(135deg, #E91E63 0%, #FF6090 100%) !important;
         color: #FFFFFF !important;
         border: none !important;
-        border-radius: 12px !important;
-        padding: 0.75rem 1.5rem !important;
-        font-weight: 600 !important;
-        font-size: 1rem !important;
-        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4) !important;
-        transition: all 0.3s ease !important;
+        box-shadow: 0 6px 18px rgba(233, 30, 99, 0.35) !important;
+    }}
+
+    div.stButton > button[kind="primary"] * {{
+        color: #FFFFFF !important;
     }}
 
     div.stButton > button[kind="primary"]:hover {{
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.6) !important;
-        background: linear-gradient(135deg, #4F46E5 0%, #4338CA 100%) !important;
-    }}
-
-    div.stButton > button[kind="secondary"] {{
-        background: rgba(255, 255, 255, 0.05) !important;
-        color: #F1F5F9 !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        border-radius: 12px !important;
-        padding: 0.75rem 1.5rem !important;
-        font-weight: 600 !important;
-        transition: all 0.3s ease !important;
-    }}
-
-    div.stButton > button[kind="secondary"]:hover {{
-        background: rgba(255, 255, 255, 0.12) !important;
-        border-color: #6366F1 !important;
-        color: #FFFFFF !important;
+        background: linear-gradient(135deg, #C2185B 0%, #E91E63 100%) !important;
         transform: translateY(-2px) !important;
     }}
 
+    /* 10. METRIC CARDS */
     [data-testid="stMetric"] {{
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        padding: 1.2rem;
-        border-radius: 14px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        background: #FFF0F5 !important;
+        border: 2px solid #FFC2D1 !important;
+        border-radius: 18px !important;
     }}
 
     [data-testid="stMetricValue"] {{
-        font-size: 2.2rem !important;
+        color: #C2185B !important;
         font-weight: 800 !important;
-        color: #818CF8 !important;
     }}
 
     [data-testid="stMetricLabel"] {{
-        color: #94A3B8 !important;
-        font-weight: 600 !important;
+        color: #6B2D43 !important;
+        font-weight: 700 !important;
     }}
 
-    div[data-baseweb="input"] > div, div[data-baseweb="textarea"] > div {{
-        background-color: rgba(15, 23, 42, 0.6) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        border-radius: 10px !important;
-        color: #F8FAFC !important;
-    }}
-
-    div[data-baseweb="input"] > div:focus-within, div[data-baseweb="textarea"] > div:focus-within {{
-        border-color: #6366F1 !important;
-        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
-    }}
-
-    [data-testid="stFileUploader"] section {{
-        background-color: rgba(255, 255, 255, 0.02) !important;
-        border: 2px dashed rgba(99, 102, 241, 0.4) !important;
-        border-radius: 14px !important;
-        padding: 2rem !important;
-        transition: all 0.3s ease !important;
-    }}
-
-    [data-testid="stFileUploader"] section:hover {{
-        border-color: #818CF8 !important;
-        background-color: rgba(99, 102, 241, 0.05) !important;
-    }}
-
+    /* 11. DIVIDER */
     hr {{
-        border-color: rgba(255, 255, 255, 0.08) !important;
+        border-color: #FFC2D1 !important;
         margin: 2rem 0 !important;
     }}
     </style>
@@ -207,15 +331,17 @@ def modal_upload_drive():
 # 3. HEADER APLIKASI
 # =========================================================
 
-st.title("📑 DRPP & SPB Automatic Splitter")
+st.title("📑 DRPP & SPB Splitter Mikel Ganteng")
 
 st.markdown(
     """
-    Aplikasi otomatis untuk memisahkan dokumen pembayaran berdasarkan nomor **Surat Perintah Bayar (SPB)**.
+    <p style="color: #3D1E28; font-size: 1.05rem; font-weight: 600;">
+        Aplikasi otomatis untuk memisahkan dokumen pembayaran berdasarkan nomor <strong>Surat Perintah Bayar (SPB)</strong>.
+    </p>
     
-    <div style="background: rgba(99, 102, 241, 0.08); border-left: 4px solid #6366F1; padding: 1rem 1.2rem; border-radius: 8px; margin-top: 1rem;">
-        <span style="color: #E2E8F0; font-size: 0.95rem;">
-            <strong>Output Otomatis:</strong><br>
+    <div style="background: #FFF0F5; border-left: 5px solid #E91E63; border-radius: 12px; padding: 1.2rem; margin-top: 1rem; border-top: 1px solid #FFC2D1; border-right: 1px solid #FFC2D1; border-bottom: 1px solid #FFC2D1;">
+        <span style="color: #3D1E28; font-size: 0.95rem; line-height: 1.6;">
+            <strong style="color: #C2185B;">Output Otomatis:</strong><br>
             • <b>1 File DRPP</b> (Daftar Rincian Permintaan Pembayaran + Lampiran)<br>
             • <b>File SPB Mandiri</b> (Lengkap dengan kuitansi & bukti transfer untuk tiap nomor SPB)
         </span>
@@ -578,4 +704,4 @@ else:
 # =========================================================
 
 st.divider()
-st.caption("DRPP & SPB Automatic Splitter | Python + Streamlit + Tesseract OCR")
+st.caption("DRPP & SPB Splitter Tester Mikel Ganteng | Python + Streamlit + Tesseract OCR")
