@@ -1,6 +1,7 @@
 import io
 import os
 import re
+import json
 import streamlit as st
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -13,55 +14,55 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def extract_folder_id(url_or_id):
-    """Mengekstrak Folder ID dari URL Google Drive atau mengambil ID langsung."""
     if not url_or_id:
         return None
-    
     match = re.search(r'folders/([a-zA-Z0-9_-]+)', url_or_id)
     if match:
         return match.group(1)
-        
     return url_or_id.strip()
 
 
 def _get_user_credentials():
-    """Autentikasi menggunakan OAuth 2.0 milik akun Google pengguna."""
     creds = None
     token_path = os.path.join(BASE_DIR, "token.json")
-    
-    possible_secrets = [
-        os.path.join(BASE_DIR, "client_secret.json"),
-        os.path.join(BASE_DIR, "client_secret.json.json")
-    ]
-    
-    client_secret_path = None
-    for p in possible_secrets:
-        if os.path.exists(p):
-            client_secret_path = p
-            break
 
-    # 1. Cek jika token otorisasi sudah tersimpan sebelumnya
-    if os.path.exists(token_path):
+    # 1. Cek token di Streamlit Secrets (Server Cloud) atau file lokal token.json
+    if "gdrive_token" in st.secrets:
+        token_data = st.secrets["gdrive_token"]
+        token_info = json.loads(token_data) if isinstance(token_data, str) else dict(token_data)
+        creds = Credentials.from_authorized_user_info(token_info, SCOPES)
+    elif os.path.exists(token_path):
         creds = Credentials.from_authorized_user_file(token_path, SCOPES)
-    
-    # 2. Jika belum ada atau kadaluarsa, lakukan login OAuth
+
+    # 2. Jika token belum ada atau kedaluwarsa
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            if not client_secret_path:
-                raise RuntimeError(
-                    "File client_secret.json tidak ditemukan di folder proyek. "
-                    "Pastikan Anda telah mengunduh kredensial Desktop App dari Google Cloud Console."
-                )
-            flow = InstalledAppFlow.from_client_secrets_file(
-                client_secret_path, SCOPES
-            )
+            # Baca client_secret dari Secrets atau file lokal
+            if "gdrive_client_secret" in st.secrets:
+                secret_data = st.secrets["gdrive_client_secret"]
+                client_config = json.loads(secret_data) if isinstance(secret_data, str) else dict(secret_data)
+                flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
+            else:
+                possible_secrets = [
+                    os.path.join(BASE_DIR, "client_secret.json"),
+                    os.path.join(BASE_DIR, "client_secret.json.json")
+                ]
+                client_secret_path = next((p for p in possible_secrets if os.path.exists(p)), None)
+                if not client_secret_path:
+                    raise RuntimeError(
+                        "Kredensial Google Drive tidak ditemukan. Silakan tambahkan file client_secret.json "
+                        "di lokal atau konfigurasikan Secrets di Streamlit Cloud."
+                    )
+                flow = InstalledAppFlow.from_client_secrets_file(client_secret_path, SCOPES)
+
             creds = flow.run_local_server(port=0)
-        
-        # Simpan token login agar tidak perlu login ulang di masa mendatang
-        with open(token_path, "w") as token_file:
-            token_file.write(creds.to_json())
+
+        # Simpan token lokal jika dijalankan di komputer sendiri
+        if "gdrive_token" not in st.secrets:
+            with open(token_path, "w") as token_file:
+                token_file.write(creds.to_json())
 
     return creds
 
